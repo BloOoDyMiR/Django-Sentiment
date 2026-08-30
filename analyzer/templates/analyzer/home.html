@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>سامانه تحلیل احساسات فارسی</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #6c5ce7;
+      --secondary: #a29bfe;
+      --success: #00b894;
+      --danger: #d63031;
+      --warning: #fdcb6e;
+      --info: #0984e3;
+      --light: #dfe6e9;
+      --dark: #2d3436;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Vazirmatn, sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      min-height: 100vh;
+      padding: 15px;
+      margin: 0;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 100%;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%23a29bfe' fill-opacity='0.1' d='M0,224L48,213.3C96,203,192,181,288,160C384,139,480,117,576,122.7C672,128,768,160,864,170.7C960,181,1056,171,1152,165.3C1248,160,1344,160,1392,160L1440,160L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E");
+      background-size: cover;
+      background-position: center;
+      z-index: -1;
+    }
+
+    .container {
+      max-width: 100%;
+      padding: 0 15px;
+    }
+
+    .card {
+      max-width: 1000px;
+      margin: 20px auto;
+      padding: 20px;
+      border-radius: 20px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      transform-style: preserve-3d;
+      transition: all 0.5s ease;
+      border: none;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .header-title {
+      font-weight: 800;
+      color: var(--primary);
+      text-align: center;
+      margin-bottom: 25px;
+      position: relative;
+      padding-bottom: 15px;
+      font-size: clamp(1.5rem, 5vw, 2.2rem);
+      word-wrap: break-word;
+    }
+
+    .header-title::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      right: 50%;
+      transform: translateX(50%);
+      width: min(350px, 90%);
+      height: 3px;
+      background: linear-gradient(to right, var(--primary), var(--secondary));
+      border-radius: 2px;
+    }
+
+    .alert {
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 20px;
+      font-size: clamp(0.9rem, 2.5vw, 1rem);
+    }
+
+    .form-label {
+      font-weight: 600;
+      color: var(--dark);
+      margin-bottom: 10px;
+      font-size: clamp(1rem, 2.5vw, 1.1rem);
+    }
+
+    .form-control {
+      border-radius: 12px;
+      padding: 15px;
+      border: 2px solid #e6e6e6;
+      transition: all 0.3s;
+      font-size: clamp(0.9rem, 2.5vw, 1rem);
+      min-height: 120px;
+      width: 100%;
+    }
+
+    .form-control:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 0.25rem rgba(108, 92, 231, 0.25);
+      transform: translateY(-2px);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      border: none;
+      border-radius: 12px;
+      padding: 12px 25px;
+      font-weight: 600;
+      font-size: clamp(1rem, 2.5vw, 1.1rem);
+      transition: all 0.3s;
+      box-shadow: 0 5px 15px rgba(108, 92, 231, 0.3);
+      width: 100%;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(108, 92, 231, 0.4);
+    }
+
+    .btn-primary:active {
+      transform: translateY(1px);
+    }
+
+    .result-container {
+      margin-top: 30px;
+      padding: 20px;
+      border-radius: 15px;
+      background: rgba(255, 255, 255, 0.8);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+      transform: scale(0.95);
+      opacity: 0;
+      animation: fadeIn 0.5s forwards;
+    }
+
+    @keyframes fadeIn {
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .result-label {
+      font-weight: 700;
+      color: var(--dark);
+      margin-bottom: 10px;
+      font-size: clamp(0.9rem, 2.5vw, 1rem);
+      word-wrap: break-word;
+    }
+
+    .result-value {
+      font-weight: 800;
+      font-size: clamp(1.2rem, 4vw, 1.4rem);
+      padding: 10px 15px;
+      border-radius: 10px;
+      display: inline-block;
+      margin-top: 10px;
+      animation: bounceIn 0.6s ease;
+    }
+
+    @keyframes bounceIn {
+      0% {
+        transform: scale(0.3);
+        opacity: 0;
+      }
+      50% {
+        transform: scale(1.05);
+      }
+      70% {
+        transform: scale(0.9);
+      }
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .positive {
+      color: var(--success);
+      background: rgba(0, 184, 148, 0.1);
+      border: 2px solid var(--success);
+    }
+
+    .negative {
+      color: var(--danger);
+      background: rgba(214, 48, 49, 0.1);
+      border: 2px solid var(--danger);
+    }
+
+    .neutral {
+      color: var(--info);
+      background: rgba(9, 132, 227, 0.1);
+      border: 2px solid var(--info);
+    }
+
+    .feedback-title {
+      font-weight: 600;
+      margin: 20px 0 15px;
+      color: var(--dark);
+      font-size: clamp(0.95rem, 2.5vw, 1.05rem);
+    }
+
+    .btn-feedback {
+      border-radius: 10px;
+      padding: 10px 20px;
+      font-weight: 600;
+      transition: all 0.3s;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+      font-size: clamp(0.85rem, 2.5vw, 1rem);
+      flex: 1;
+      max-width: 200px;
+    }
+
+    .btn-feedback:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, var(--success) 0%, #55efc4 100%);
+      border: none;
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, var(--danger) 0%, #ff7675 100%);
+      border: none;
+    }
+
+    .pulse {
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(108, 92, 231, 0.4);
+      }
+      70% {
+        box-shadow: 0 0 0 10px rgba(108, 92, 231, 0);
+      }
+      100% {
+        box-shadow: 0 0 0 0 rgba(108, 92, 231, 0);
+      }
+    }
+
+    .floating {
+      animation: floating 3s ease-in-out infinite;
+    }
+
+    @keyframes floating {
+      0% { transform: translate(0, 0px); }
+      50% { transform: translate(0, 10px); }
+      100% { transform: translate(0, -0px); }
+    }
+
+    .emoji {
+      font-size: clamp(1.5rem, 4vw, 2rem);
+      margin-left: 10px;
+    }
+
+    .feature-icon {
+      width: clamp(60px, 15vw, 70px);
+      height: clamp(60px, 15vw, 70px);
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      color: white;
+      font-size: clamp(1.5rem, 4vw, 1.8rem);
+      box-shadow: 0 5px 15px rgba(108, 92, 231, 0.3);
+      transition: all 0.3s;
+    }
+
+    .feature-card {
+      text-align: center;
+      padding: 20px;
+      border-radius: 15px;
+      background: rgba(255, 255, 255, 0.8);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s;
+      height: 100%;
+      margin-bottom: 20px;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .feature-card:hover .feature-icon {
+      transform: rotate(360deg);
+    }
+
+    .feature-card h4 {
+      font-size: clamp(1rem, 3vw, 1.2rem);
+      margin-bottom: 15px;
+      color: var(--dark);
+    }
+
+    .feature-card p {
+      font-size: clamp(0.85rem, 2.5vw, 0.95rem);
+      color: #636e72;
+      line-height: 1.6;
+    }
+
+    .footer {
+      text-align: center;
+      padding: 20px;
+      color: var(--dark);
+      font-size: clamp(0.8rem, 2vw, 0.9rem);
+      margin-top: 40px;
+    }
+
+    .d-flex {
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    /* Responsive improvements */
+    @media (max-width: 768px) {
+      body {
+        padding: 10px;
+      }
+
+      .card {
+        padding: 15px;
+        margin: 10px auto;
+        border-radius: 15px;
+      }
+
+      .header-title {
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+      }
+
+      .form-control {
+        min-height: 100px;
+        padding: 12px;
+      }
+
+      .btn-primary {
+        padding: 10px 20px;
+      }
+
+      .result-container {
+        padding: 15px;
+        margin-top: 20px;
+      }
+
+      .btn-feedback {
+        padding: 8px 15px;
+        max-width: none;
+      }
+
+      .feature-card {
+        padding: 15px;
+      }
+
+      .footer {
+        margin-top: 30px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 5px;
+      }
+
+      .card {
+        padding: 12px;
+        border-radius: 12px;
+      }
+
+      .header-title::after {
+        width: 80%;
+      }
+
+      .result-value {
+        padding: 8px 12px;
+      }
+
+      .btn-feedback {
+        font-size: 0.85rem;
+        padding: 8px 12px;
+      }
+    }
+
+    /* Shimmer effect for cards */
+    .feature-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+      transition: left 0.5s;
+    }
+
+    .feature-card {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feature-card:hover::before {
+      left: 100%;
+    }
+
+    /* Improved icon animations */
+    .fas {
+      transition: all 0.3s ease;
+    }
+
+    .btn:hover .fas {
+      transform: scale(1.2);
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="card floating">
+    <h1 class="header-title">
+      تحلیل احساسات مشتری
+    </h1>
+    
+    <!-- توضیحات -->
+    <div class="alert alert-info text-center">
+      پروژه پایانی
+    </div>
+
+    <!-- Prediction Form -->
+    <form method="post" id="sentimentForm">
+      {% csrf_token %}
+      <div class="mb-4">
+        <label class="form-label">متن خود را وارد کنید:</label>
+        <textarea class="form-control" id="textInput" name="text" placeholder="متن فارسی خود را اینجا بنویسید..." rows="5" required></textarea>
+        <div id="errorMessage" class="alert alert-danger mt-2" style="display: none;"></div>
+      </div>
+      <button type="submit" class="btn btn-primary pulse">
+        <i class="fas fa-search me-2"></i>
+        تحلیل احساس
+      </button>
+    </form>
+
+    <!-- Prediction Result -->
+    {% if result %}
+    <div class="result-container">
+      <div class="result-label">نتیجه تحلیل جمله: {{ analyzed_text }}</div>
+
+      <div class="result-value {% if result == 'HAPPY' %}positive{% elif result == 'SAD' %}negative{% else %}neutral{% endif %}">
+        {% if result == 'HAPPY' %}
+          <i class="fas fa-smile me-2"></i>
+          مثبت
+        {% elif result == 'SAD' %}
+          <i class="fas fa-frown me-2"></i>
+          منفی
+        {% else %}
+          <i class="fas fa-meh me-2"></i>
+          خنثی
+        {% endif %}
+      </div>
+
+      <!-- Feedback Form -->
+      <form method="post" action="{% url 'feedback' %}">
+        {% csrf_token %}
+        <input type="hidden" name="text" value="{{ analyzed_text }}">
+        <div class="feedback-title">آیا این تحلیل صحیح است؟</div>
+        <div class="d-flex justify-content-center">
+          <button type="submit" name="correct_label" value="yes" class="btn btn-success btn-feedback">
+            <i class="fas fa-check me-2"></i>
+            بله، درست است
+          </button>
+          <button type="submit" name="correct_label" value="no" class="btn btn-danger btn-feedback">
+            <i class="fas fa-times me-2"></i>
+            خیر، نادرست است
+          </button>
+        </div>
+      </form>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Features Section -->
+  <div class="row mt-5">
+    <div class="col-md-4 mb-4">
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fas fa-bolt"></i>
+        </div>
+        <h4>تحلیل سریع</h4>
+        <p>تحلیل احساس در کسری از ثانیه با استفاده از پیشرفته‌ترین الگوریتم‌ها</p>
+      </div>
+    </div>
+    <div class="col-md-4 mb-4">
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fas fa-language"></i>
+        </div>
+        <h4>پشتیبانی از فارسی</h4>
+        <p>بهینه‌شده برای پردازش زبان فارسی و درک ظرافت‌های آن</p>
+      </div>
+    </div>
+    <div class="col-md-4 mb-4">
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fas fa-chart-line"></i>
+        </div>
+        <h4>یادگیری مستمر</h4>
+        <p>بهبود مداوم دقت با استفاده از بازخوردهای کاربران</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>تمامی حقوق محفوظ است © 1404</p>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('sentimentForm');
+    const textarea = document.getElementById('textInput');
+    const errorMessage = document.getElementById('errorMessage');
+
+    // Form validation
+    form.addEventListener('submit', function(e) {
+      const text = textarea.value;
+      
+      // Check if empty or only whitespace
+      if (!text.trim()) {
+        e.preventDefault();
+        showError('لطفاً متن خود را وارد کنید. متن نمی‌تواند خالی باشد.');
+        return false;
+      }
+
+      // Check for English characters
+      const englishPattern = /[a-zA-Z]/;
+      if (englishPattern.test(text)) {
+        e.preventDefault();
+        showError('لطفاً فقط از حروف فارسی استفاده کنید. حروف انگلیسی مجاز نیستند.');
+        return false;
+      }
+
+      // Check if contains Persian characters
+      const persianPattern = /[\u0600-\u06FF]/;
+      if (!persianPattern.test(text)) {
+        e.preventDefault();
+        showError('لطفاً متن فارسی وارد کنید.');
+        return false;
+      }
+
+      hideError();
+      return true;
+    });
+
+    function showError(message) {
+      errorMessage.textContent = message;
+      errorMessage.style.display = 'block';
+      textarea.style.borderColor = 'var(--danger)';
+      textarea.focus();
+      
+      // Shake animation
+      textarea.style.animation = 'shake 0.5s';
+      setTimeout(() => {
+        textarea.style.animation = '';
+      }, 500);
+    }
+
+    function hideError() {
+      errorMessage.style.display = 'none';
+      textarea.style.borderColor = '';
+    }
+
+    // Clear error on input
+    textarea.addEventListener('input', function() {
+      if (errorMessage.style.display === 'block') {
+        hideError();
+      }
+    });
+
+    if (textarea) {
+      textarea.addEventListener('focus', function() {
+        this.style.transform = 'scale(1.02)';
+      });
+
+      textarea.addEventListener('blur', function() {
+        this.style.transform = 'scale(1)';
+      });
+    }
+
+    // Animate feature cards on scroll
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -100px 0px'
+    };
+
+    const observer = new IntersectionObserver(function(entries) {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+        }
+      });
+    }, observerOptions);
+
+    const featureCards = document.querySelectorAll('.feature-card');
+    featureCards.forEach((card, index) => {
+      card.style.opacity = '0';
+      card.style.transform = 'translateY(30px)';
+      card.style.transition = `all 0.6s ease ${index * 0.15}s`;
+      observer.observe(card);
+    });
+
+    // Add ripple effect to buttons
+    const buttons = document.querySelectorAll('.btn');
+    buttons.forEach(button => {
+      button.addEventListener('click', function(e) {
+        const ripple = document.createElement('span');
+        const rect = this.getBoundingClientRect();
+        const size = Math.max(rect.width, rect.height);
+        const x = e.clientX - rect.left - size / 2;
+        const y = e.clientY - rect.top - size / 2;
+
+        ripple.style.width = ripple.style.height = size + 'px';
+        ripple.style.left = x + 'px';
+        ripple.style.top = y + 'px';
+        ripple.style.position = 'absolute';
+        ripple.style.borderRadius = '50%';
+        ripple.style.background = 'rgba(255, 255, 255, 0.6)';
+        ripple.style.transform = 'scale(0)';
+        ripple.style.animation = 'ripple 0.6s ease-out';
+        ripple.style.pointerEvents = 'none';
+
+        this.style.position = 'relative';
+        this.style.overflow = 'hidden';
+        this.appendChild(ripple);
+
+        setTimeout(() => ripple.remove(), 600);
+      });
+    });
+  });
+
+  // Add ripple and shake animations
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes ripple {
+      to {
+        transform: scale(4);
+        opacity: 0;
+      }
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+      20%, 40%, 60%, 80% { transform: translateX(5px); }
+    }
+  `;
+  document.head.appendChild(style);
+</script>
+
+</body>
+</html>
